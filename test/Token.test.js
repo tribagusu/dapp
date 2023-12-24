@@ -1,24 +1,28 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
+const tokens = (n) => {
+  return ethers.utils.parseUnits(n.toString(), "ether");
+};
+
 describe("Token", () => {
-  let token;
-  const tokens = (n) => {
-    return ethers.utils.parseUnits(n.toString(), "ether");
-  };
+  let token, accounts, deployer;
 
   beforeEach(async () => {
     // fetch the token from blockchain
     const Token = await ethers.getContractFactory("Token");
     // deploy to the test
     token = await Token.deploy("Sholjum", "SHOL", 1000000);
+    // fetch the accounts
+    accounts = await ethers.getSigners();
+    deployer = accounts[0];
   });
 
   describe("Deployment", () => {
     const name = "Sholjum";
     const symbol = "SHOL";
     const decimals = 18;
-    const totalSupply = 1000000;
+    const totalSupply = tokens(1000000);
 
     it("has correct name", async () => {
       // eslint-disable-next-line jest/valid-expect
@@ -37,7 +41,12 @@ describe("Token", () => {
 
     it("has correct total supply", async () => {
       // eslint-disable-next-line jest/valid-expect
-      expect(await token.totalSupply()).to.equal(tokens(totalSupply));
+      expect(await token.totalSupply()).to.equal(totalSupply);
+    });
+
+    it("assigns total supply to deployer", async () => {
+      // eslint-disable-next-line jest/valid-expect
+      expect(await token.balanceOf(deployer.address)).to.equal(totalSupply);
     });
   });
 });
