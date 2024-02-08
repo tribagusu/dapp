@@ -37,23 +37,29 @@ contract Token {
         balanceOf[msg.sender] = totalSupply;
     }
 
-    function transfer(
-        address _to,
-        uint256 _value
-    ) public returns (bool success) {
-        // require that sender has enough tokens to spend
-        require(balanceOf[msg.sender] >= _value);
-        // require that sender has correct address
+    // create internal function that will be used multiple times so that we don't repeat our code
+    function _transfer(address _from, address _to, uint256 _value) internal {
+        // check that sender has correct address
         require(_to != address(0));
 
         // deduct tokens from sender
-        balanceOf[msg.sender] = balanceOf[msg.sender] - _value;
+        balanceOf[_from] = balanceOf[_from] - _value;
 
         // credit tokens to receiver
         balanceOf[_to] = balanceOf[_to] + _value;
 
         // emit event
-        emit Transfer(msg.sender, _to, _value);
+        emit Transfer(_from, _to, _value);
+    }
+
+    function transfer(
+        address _to,
+        uint256 _value
+    ) public returns (bool success) {
+        // check that sender has enough tokens to spend
+        require(balanceOf[msg.sender] >= _value);
+
+        _transfer(msg.sender, _to, _value);
 
         return true;
     }
@@ -62,13 +68,36 @@ contract Token {
         address _spender,
         uint256 _value
     ) public returns (bool success) {
-        // require that spender has correct address
+        // check that spender has correct address
         require(_spender != address(0));
 
+        // assign amount to the allowance
         allowance[msg.sender][_spender] = _value;
 
         // emit event
         emit Approval(msg.sender, _spender, _value);
+
+        return true;
+    }
+
+    function transferFrom(
+        address _from,
+        address _to,
+        uint256 _value
+    ) public returns (bool success) {
+        // check that sender has enough tokens to spend
+        require(_value <= balanceOf[_from], "insufficient balance");
+        // check approval
+        require(
+            _value <= allowance[_from][msg.sender],
+            "insufficient allowance"
+        );
+
+        // reset allowance
+        allowance[_from][msg.sender] = allowance[_from][msg.sender] - _value;
+
+        // spend tokens
+        _transfer(_from, _to, _value);
 
         return true;
     }
