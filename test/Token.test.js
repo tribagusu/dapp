@@ -157,7 +157,7 @@ describe("Token", () => {
     });
   });
 
-  describe("Delegated token transfers", () => {
+  describe("Delegated Token Transfers", () => {
     let amount, transaction, result;
 
     beforeEach(async () => {

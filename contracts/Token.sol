@@ -86,10 +86,10 @@ contract Token {
         uint256 _value
     ) public returns (bool success) {
         // check that sender has enough tokens to spend
-        require(_value <= balanceOf[_from], "insufficient balance");
+        require(balanceOf[_from] >= _value, "insufficient balance");
         // check approval
         require(
-            _value <= allowance[_from][msg.sender],
+            allowance[_from][msg.sender] >= _value,
             "insufficient allowance"
         );
 
